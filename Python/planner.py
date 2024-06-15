@@ -2,33 +2,37 @@ import tkinter as tk
 from tkinter import font
 
 class StickyNote:
-    def __init__(self, root, x, y, width=200, height=100):
+    def __init__(self, root, x, y, width=200, height=300):
         self.root = root
         self.width = width
         self.height = height
+        self.custom_font = font.Font(family="Roboto", size=10, weight="normal")
 
         # Main outer frame for each sticky note
         self.frame = tk.Frame(root, bg='#e0e0e0', bd=0, relief='solid')
         self.frame.place(x=x, y=y, width=self.width, height=self.height)
 
         # Title bar for each note. Used for repositioning note
-        self.title_bar = tk.Frame(self.frame, bg='#00171F', height=20, relief='raised', bd=1)
+        self.title_bar = tk.Frame(self.frame, bg='#00171F', height=100, relief='raised', bd=1)
         self.title_bar.pack(fill='x')
-        self.title_label = tk.Label(self.title_bar, text="Sticky Note", bg='#00171F', fg='white')
+        self.title_label = tk.Label(self.title_bar, text="Sticky Note", bg='#00171F', fg='white', font=self.custom_font)
         self.title_label.pack(side='left', padx=5)
 
         # Delete button
-        self.delete_button = tk.Button(self.title_bar, text="X", bg='red', fg='white', command=self.delete_note)
-        self.delete_button.pack(side='right', padx=10)
+        self.delete_button = tk.Button(self.title_bar, bg='red', fg='white', command=self.delete_note, height=1, width=1, padx=3, pady=0)
+        self.delete_button.pack(side='right', padx=0)
 
         # Note content (using text widget)
-        self.custom_font = font.Font(family="Roboto", size=11, weight="normal")
         self.text = tk.Text(self.frame, bg='#e0e0e0', wrap='word', bd=0, padx=5, pady=5, font=self.custom_font)
         self.text.pack(expand=True, fill='both')
 
         # Functionality for repositoning notes (see functions below)
         self.frame.bind('<Button-1>', self.start_move)
         self.frame.bind('<B1-Motion>', self.do_move)
+        self.title_bar.bind('<Button-1>', self.start_move)
+        self.title_bar.bind('<B1-Motion>', self.do_move)
+        self.title_label.bind('<Button-1>', self.start_move)
+        self.title_label.bind('<B1-Motion>', self.do_move)
         self.title_bar.bind('<Button-1>', self.start_move)
         self.title_bar.bind('<B1-Motion>', self.do_move)
 
@@ -71,7 +75,7 @@ def main():
     global root
     root = tk.Tk()
     root.title("Sticky Notes")
-    root.geometry("800x600")
+    root.geometry("1280x720")
 
     # notes = [
     #     (50, 50),
