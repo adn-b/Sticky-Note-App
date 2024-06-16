@@ -1,10 +1,7 @@
-import tkinter as tk
 from tkinter import font
-import customtkinter as ctk
-import json
-import os
+import json, os, tkinter as tk, customtkinter as ctk
 
-SAVE_FILE = "sticky_notes.json"
+note_state_file = "sticky_notes.json"
 
 class StickyNote:
     def __init__(self, root, x, y, width=200, height=300, text=""):
@@ -85,12 +82,12 @@ class StickyNote:
 
 def save_notes():
     notes_state = [note.get_state() for note in sticky_notes]
-    with open(SAVE_FILE, "w") as f:
+    with open(note_state_file, "w") as f:
         json.dump(notes_state, f)
 
 def load_notes():
-    if os.path.exists(SAVE_FILE):
-        with open(SAVE_FILE, "r") as f:
+    if os.path.exists(note_state_file):
+        with open(note_state_file, "r") as f:
             notes_state = json.load(f)
             for note_state in notes_state:
                 note = StickyNote(
@@ -116,12 +113,14 @@ def main():
     global root, sticky_notes
     sticky_notes = []
 
-    ctk.set_appearance_mode("System")
+    mode = ctk.set_appearance_mode("system")
     ctk.set_default_color_theme("blue")
 
     root = ctk.CTk()
     root.title("Sticky Notes")
     root.geometry("1280x720")
+
+    root.iconbitmap("assets/icon2.ico")
 
     load_notes()
 
