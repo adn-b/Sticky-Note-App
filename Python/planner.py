@@ -1,8 +1,13 @@
 import tkinter as tk
 from tkinter import font
+import customtkinter as ctk
+import json
+import os
+
+SAVE_FILE = "sticky_notes.json"
 
 class StickyNote:
-    def __init__(self, root, x, y, width=200, height=300):
+    def __init__(self, root, x, y, width=200, height=300, text=""):
         self.root = root
         self.width = width
         self.height = height
@@ -19,12 +24,13 @@ class StickyNote:
         self.title_label.pack(side='left', padx=5)
 
         # Delete button
-        self.delete_button = tk.Button(self.title_bar, bg='red', fg='white', command=self.delete_note, height=1, width=1, padx=3, pady=0)
-        self.delete_button.pack(side='right', padx=0)
+        self.delete_button = ctk.CTkButton(self.title_bar, text="X", fg_color='red', text_color='white', command=self.delete_note, width=20, height=20, corner_radius=10)
+        self.delete_button.pack(side='right', padx=5, pady=0)
 
         # Note content (using text widget)
         self.text = tk.Text(self.frame, bg='#e0e0e0', wrap='word', bd=0, padx=5, pady=5, font=self.custom_font)
         self.text.pack(expand=True, fill='both')
+        self.text.insert(tk.END, text)
 
         # Functionality for repositoning notes (see functions below)
         self.frame.bind('<Button-1>', self.start_move)
@@ -66,31 +72,64 @@ class StickyNote:
 
     def delete_note(self):
         self.frame.destroy()
+        sticky_notes.remove(self)
+
+    def get_state(self):
+        return {
+            "x": self.frame.winfo_x(),
+            "y": self.frame.winfo_y(),
+            "width": self.frame.winfo_width(),
+            "height": self.frame.winfo_height(),
+            "text": self.text.get("1.0", tk.END).strip()
+        }
+
+def save_notes():
+    notes_state = [note.get_state() for note in sticky_notes]
+    with open(SAVE_FILE, "w") as f:
+        json.dump(notes_state, f)
+
+def load_notes():
+    if os.path.exists(SAVE_FILE):
+        with open(SAVE_FILE, "r") as f:
+            notes_state = json.load(f)
+            for note_state in notes_state:
+                note = StickyNote(
+                    root,
+                    note_state["x"],
+                    note_state["y"],
+                    note_state["width"],
+                    note_state["height"],
+                    note_state["text"]
+                )
+                sticky_notes.append(note)
 
 def new_note():
     x, y = 100, 100
-    StickyNote(root, x, y)
+    note = StickyNote(root, x, y)
+    sticky_notes.append(note)
+
+def on_close():
+    save_notes()
+    root.destroy()
 
 def main():
-    global root
-    root = tk.Tk()
+    global root, sticky_notes
+    sticky_notes = []
+
+    ctk.set_appearance_mode("System")
+    ctk.set_default_color_theme("blue")
+
+    root = ctk.CTk()
     root.title("Sticky Notes")
     root.geometry("1280x720")
 
-    # notes = [
-    #     (50, 50),
-    #     (200, 150),
-    #     (350, 250)
-    # ]
-
-    # for x, y in notes:
-    #     StickyNote(root, x, y)
+    load_notes()
 
     # Button to create new sticky notes
-    new_note_button = tk.Button(root, text="New Note", command=new_note)
+    new_note_button = ctk.CTkButton(root, text="New Note", command=new_note)
     new_note_button.place(relx=1.0, rely=1.0, anchor='se', x=-10, y=-10)
 
-
+    root.protocol("WM_DELETE_WINDOW", on_close)
     root.mainloop()
 
 if __name__ == "__main__":
